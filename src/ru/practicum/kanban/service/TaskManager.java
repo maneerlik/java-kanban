@@ -11,18 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public class TaskManager {
-    private static int idCounter;
+    private static int idCounter = 0;
 
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Epic> epics;
-    private Map<Integer, Subtask> subtasks;
-
-    {
-        idCounter = 0;
-        tasks = new HashMap<>();
-        epics = new HashMap<>();
-        subtasks = new HashMap<>();
-    }
+    private Map<Integer, Task> tasks = new HashMap<>();
+    private Map<Integer, Epic> epics = new HashMap<>();
+    private Map<Integer, Subtask> subtasks = new HashMap<>();
 
 
     //--- Получение всех задач -----------------------------------------------------------------------------------------
@@ -189,7 +182,7 @@ public class TaskManager {
     }
 
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
-    private Integer generateId() {
+    private static Integer generateId() {
         return idCounter++;
     }
 }

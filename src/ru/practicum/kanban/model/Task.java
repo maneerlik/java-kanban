@@ -3,14 +3,10 @@ package ru.practicum.kanban.model;
 public class Task {
     private final String title;
     private final String description;
-    private Integer id;
+    private Integer id = null;
 
-    private Status status;
+    private Status status = Status.NEW;
 
-    {
-        id = null;
-        status = Status.NEW;
-    }
 
     public Task(String title, String description) {
         this.title = title;
