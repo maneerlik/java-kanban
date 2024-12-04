@@ -24,8 +24,6 @@ public class TaskManager {
         subtasks = new HashMap<>();
     }
 
-    public TaskManager() {}
-
 
     //--- Получение всех задач -----------------------------------------------------------------------------------------
     public List<Task> getAllTasks() {
