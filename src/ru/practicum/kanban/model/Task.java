@@ -45,13 +45,13 @@ public class Task {
         this.status = status;
     }
 
-    public String getType() {
-        return this.getClass().getSimpleName();
+    public Type getType() {
+        return Type.TASK;
     }
 
     @Override
     public String toString() {
         return String.format("%s{title='%s', description='%s', id=%d, status=%s}",
-                getType(), title, description, id, status);
+                this.getClass().getSimpleName(), title, description, id, status);
     }
 }

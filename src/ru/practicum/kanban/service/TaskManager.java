@@ -1,9 +1,6 @@
 package ru.practicum.kanban.service;
 
-import ru.practicum.kanban.model.Epic;
-import ru.practicum.kanban.model.Status;
-import ru.practicum.kanban.model.Subtask;
-import ru.practicum.kanban.model.Task;
+import ru.practicum.kanban.model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,20 +67,20 @@ public class TaskManager {
     public <T extends Task> T create(T task) {
         task.setId(generateId());
 
-        String type = task.getType();
+        Type type = task.getType();
 
         switch (type) {
-            case "Task" -> {
+            case Type.TASK -> {
                 Task newTask = new Task(task);
                 tasks.put(newTask.getId(), newTask);
                 return task;
             }
-            case "Epic" -> {
+            case Type.EPIC -> {
                 Epic newEpic = new Epic((Epic) task);
                 epics.put(newEpic.getId(), newEpic);
                 return task;
             }
-            case "Subtask" -> {
+            case Type.SUBTASK -> {
                 Subtask newSubtask = new Subtask((Subtask) task);
                 subtasks.put(newSubtask.getId(), newSubtask);
                 Epic epic = epics.get(newSubtask.getEpicId());
@@ -146,6 +143,7 @@ public class TaskManager {
     public Subtask deleteSubtask(int id) {
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.getSubtasksIds().remove(id);
+        evaluateEpicStatus(epic);
 
         return subtasks.remove(id);
     }
@@ -155,14 +153,24 @@ public class TaskManager {
         Epic epic = epics.get(id);
         List<Integer> subtasksByEpicIds = epic.getSubtasksIds();
 
-        return subtasks.values().stream()
-                .filter(subtask -> subtasksByEpicIds.contains(subtask.getId()))
-                .toList();
+        if (subtasksByEpicIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return subtasksByEpicIds.stream().map(subtasks::get).toList();
     }
 
     //--- Переоценка статуса эпика -------------------------------------------------------------------------------------
     private void evaluateEpicStatus(Epic epic) {
         List<Integer> subtasksIds = epic.getSubtasksIds();
+
+        boolean isAnySubtaskInProgress = subtasksIds.stream()
+                .map(subtasks::get)
+                .anyMatch(subtask -> subtask.getStatus() == Status.IN_PROGRESS);
+
+        if (isAnySubtaskInProgress) {
+            epic.setStatus(Status.IN_PROGRESS);
+        }
 
         boolean isSubtasksIdsIsEmpty = subtasksIds.isEmpty();
 
@@ -176,8 +184,6 @@ public class TaskManager {
             epic.setStatus(Status.NEW);
         } else if (isAllSubtaskDONE) {
             epic.setStatus(Status.DONE);
-        } else {
-            epic.setStatus(Status.IN_PROGRESS);
         }
     }
 
