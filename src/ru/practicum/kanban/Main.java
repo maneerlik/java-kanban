@@ -53,6 +53,8 @@ public class Main {
         manager.deleteTask(drinkCat.getId());
         manager.deleteEpic(washPlates.getId());
 
+        manager.deleteSubtask(byBread.getId());
+
         // распечатать Эпики, Задачи, Подзадачи
         print("Состояние задач после удаления:", manager);
     }
