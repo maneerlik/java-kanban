@@ -4,11 +4,12 @@ import ru.practicum.kanban.model.Epic;
 import ru.practicum.kanban.model.Status;
 import ru.practicum.kanban.model.Subtask;
 import ru.practicum.kanban.model.Task;
+import ru.practicum.kanban.service.Managers;
 import ru.practicum.kanban.service.TaskManager;
 
 public class Main {
     public static void main(String[] args) {
-        TaskManager manager = new TaskManager();
+        TaskManager manager = Managers.getDefault();
 
         // добавить 2 задачи
         Task eatCat = new Task("Накормить кота", "Дать коту сухого корма");
@@ -49,6 +50,26 @@ public class Main {
         // распечатать Эпики, Задачи, Подзадачи
         print("Состояние задач после изменения статусов:", manager);
 
+        // распечатать пустую историю
+        printHistory("Пустая история просмотров задач:", manager);
+
+        // посмотреть задачи
+        manager.getTask(eatCat.getId());
+        manager.getTask(drinkCat.getId());
+        manager.getEpic(goShop.getId());
+        manager.getSubtask(byBread.getId());
+        manager.getSubtask(byButter.getId());
+        manager.getEpic(washPlates.getId());
+        manager.getEpic(washPlates.getId());
+        manager.getEpic(washPlates.getId());
+        manager.getSubtask(wash.getId());
+        manager.getSubtask(wash.getId());
+        manager.getSubtask(wash.getId());
+        manager.getSubtask(wash.getId());
+
+        // распечатать историю
+        printHistory("История просмотров задач:", manager);
+
         // удалить задачу/эпик
         manager.deleteTask(drinkCat.getId());
         manager.deleteEpic(washPlates.getId());
@@ -67,6 +88,13 @@ public class Main {
         manager.getAllEpics().forEach(System.out::println);
         System.out.println();
         manager.getAllSubtasks().forEach(System.out::println);
+        System.out.println();
+    }
+
+    private static void printHistory(String title, TaskManager manager) {
+        System.out.println(title);
+        System.out.println("-".repeat(120));
+        manager.getHistory().forEach(System.out::println);
         System.out.println();
     }
 }
