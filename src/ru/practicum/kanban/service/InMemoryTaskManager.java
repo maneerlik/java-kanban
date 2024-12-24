@@ -172,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask deleteSubtask(int id) {
         Epic epic = epics.get(subtasks.get(id).getEpicId());
-        epic.getSubtasksIds().remove(subtasks.get(id));
+        epic.getSubtasksIds().remove(subtasks.get(id).getId());
         evaluateEpicStatus(epic);
 
         return subtasks.remove(id);
@@ -202,6 +202,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (isAnySubtaskInProgress) {
             epic.setStatus(Status.IN_PROGRESS);
+            return;
         }
 
         boolean isSubtasksIdsIsEmpty = subtasksIds.isEmpty();
@@ -212,10 +213,10 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isAllSubtaskDONE = subtasksIds.stream()
                 .allMatch(id -> subtasks.get(id).getStatus() == Status.DONE);
 
-        if (isSubtasksIdsIsEmpty || isAllSubtaskNEW) {
-            epic.setStatus(Status.NEW);
-        } else if (isAllSubtaskDONE) {
+        if (isSubtasksIdsIsEmpty || isAllSubtaskDONE) {
             epic.setStatus(Status.DONE);
+        } else if (isAllSubtaskNEW) {
+            epic.setStatus(Status.NEW);
         }
     }
 
@@ -228,5 +229,10 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
     private static Integer generateId() {
         return idCounter++;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("InMemoryTaskManager{\n\ttasks=%s,\n\tepics=%s,\n\tsubtasks=%s\n}", tasks, epics, subtasks);
     }
 }

@@ -1,5 +1,7 @@
 package ru.practicum.kanban.model;
 
+import java.util.Objects;
+
 public class Task {
     private final String title;
     private final String description;
@@ -29,7 +31,7 @@ public class Task {
         return description;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -47,6 +49,19 @@ public class Task {
 
     public Type getType() {
         return Type.TASK;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 
     @Override
