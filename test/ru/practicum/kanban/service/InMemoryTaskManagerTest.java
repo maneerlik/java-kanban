@@ -10,8 +10,8 @@ import ru.practicum.kanban.model.Task;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static ru.practicum.kanban.service.HistoryManager.HISTORY_BUFFER_SIZE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class InMemoryTaskManagerTest extends BaseTest {
 
@@ -193,11 +193,11 @@ class InMemoryTaskManagerTest extends BaseTest {
 
     @Test
     public void shouldReturnHistoryOnlyLast10Tasks() {
-        for (int i = 0; i < HISTORY_BUFFER_SIZE + 1; i++) {
+        for (int i = 0; i < 11; i++) {
             manager.getTask(task.getId());
         }
 
-        assertEquals(HISTORY_BUFFER_SIZE, manager.getHistory().size());
+        assertEquals(10, manager.getHistory().size());
     }
 
 }

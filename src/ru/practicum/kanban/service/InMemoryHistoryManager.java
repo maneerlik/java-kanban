@@ -13,6 +13,8 @@ import java.util.List;
  * @author  Smirnov Sergey
  */
 public class InMemoryHistoryManager implements HistoryManager {
+    private static final int HISTORY_BUFFER_SIZE = 10;
+
     private CircularBuffer<Task> history = new CircularBuffer<>(HISTORY_BUFFER_SIZE);
 
     //--- Пометить задачу как просмотренную ----------------------------------------------------------------------------
