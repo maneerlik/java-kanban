@@ -1,6 +1,5 @@
 package ru.practicum.kanban.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.kanban.BaseTest;
 import ru.practicum.kanban.model.Epic;
@@ -15,50 +14,35 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class InMemoryTaskManagerTest extends BaseTest {
 
-    private Task task;
-    private Epic epic;
-    private Subtask subtask;
-
-    @BeforeEach
-    public void setUp() {
-        task = new Task("Тестовая задача", "Задача в InMemoryTaskManagerTest");
-        manager.create(task);
-        epic = new Epic("Тестовый эпик", "Эпик в InMemoryTaskManagerTest");
-        manager.create(epic);
-        subtask = new Subtask("Тестовая подзадача", "Подзадача в InMemoryTaskManagerTest", epic.getId());
-        manager.create(subtask);
-    }
-
-
     @Test
-    public void shouldCreatedTask() {
+    void shouldCreatedTask() {
         assertNotNull(task);
-        assertEquals(task.getTitle(), "Тестовая задача");
-        assertEquals(task.getDescription(), "Задача в InMemoryTaskManagerTest");
-        assertEquals(task.getStatus(), Status.NEW);
+        assertEquals("Тестовая задача", task.getTitle());
+        assertEquals("Задача в InMemoryTaskManagerTest", task.getDescription());
+        assertEquals(Status.NEW, task.getStatus());
         assertNotNull(task.getId());
     }
 
     @Test
-    public void shouldCreatedEpic() {
+    void shouldCreatedEpic() {
         assertNotNull(epic);
-        assertEquals(epic.getTitle(), "Тестовый эпик");
-        assertEquals(epic.getDescription(), "Эпик в InMemoryTaskManagerTest");
-        assertEquals(epic.getStatus(), Status.NEW);
+        assertEquals("Тестовый эпик", epic.getTitle());
+        assertEquals("Эпик в InMemoryTaskManagerTest", epic.getDescription());
+        assertEquals(Status.NEW, epic.getStatus());
         assertNotNull(epic.getId());
     }
 
     @Test
-    public void shouldCreatedSubtask() {
+    void shouldCreatedSubtask() {
         assertNotNull(subtask);
-        assertEquals(subtask.getTitle(), "Тестовая подзадача");
-        assertEquals(subtask.getDescription(), "Подзадача в InMemoryTaskManagerTest");
-        assertEquals(subtask.getStatus(), Status.NEW);
+        assertEquals("Тестовая подзадача", subtask.getTitle());
+        assertEquals("Подзадача в InMemoryTaskManagerTest", subtask.getDescription());
+        assertEquals(Status.NEW, subtask.getStatus());
         assertNotNull(subtask.getId());
     }
 
     @Test
-    public void shouldReturnAllTasks() {
+    void shouldReturnAllTasks() {
         Task sameTask = new Task(task);
         manager.create(sameTask);
 
@@ -67,7 +51,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldReturnAllEpics() {
+    void shouldReturnAllEpics() {
         Epic sameEpic = new Epic(epic);
         manager.create(sameEpic);
 
@@ -76,7 +60,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldReturnAllSubtasks() {
+    void shouldReturnAllSubtasks() {
         Subtask sameSubtask = new Subtask(subtask);
         manager.create(sameSubtask);
 
@@ -85,7 +69,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldUpdateTask() {
+    void shouldUpdateTask() {
         Task updatedTask = new Task("Обновленная задача", "Обновленное описание задачи");
         updatedTask.setStatus(Status.IN_PROGRESS);
         updatedTask.setId(task.getId());
@@ -99,7 +83,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldUpdateEpic() {
+    void shouldUpdateEpic() {
         Epic updatedEpic = new Epic("Обновленный эпик", "Обновленное описание эпика");
         updatedEpic.getSubtasksIds().add(subtask.getId());
         updatedEpic.setId(epic.getId());
@@ -115,7 +99,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldUpdateSubtask() {
+    void shouldUpdateSubtask() {
         Subtask updatedSubtask =
                 new Subtask("Обновленная подзадача", "Обновленное описание подзадачи", epic.getId());
         updatedSubtask.setStatus(Status.DONE);
@@ -130,7 +114,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void deleteTask() {
+    void deleteTask() {
         Task deletedTask = manager.deleteTask(task.getId());
 
         assertNotNull(deletedTask);
@@ -139,7 +123,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void deleteEpic() {
+    void deleteEpic() {
         Epic deletedEpic = manager.deleteEpic(epic.getId());
 
         assertNotNull(deletedEpic);
@@ -148,7 +132,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void deleteSubtask() {
+    void deleteSubtask() {
         Subtask deletedSubtask = manager.deleteSubtask(subtask.getId());
 
         assertNotNull(deletedSubtask);
@@ -157,7 +141,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldReturnSubtasksByEpic() {
+    void shouldReturnSubtasksByEpic() {
         Subtask sameSubtask = new Subtask(
                 "Еще тестовая подзадача", "Еще подзадача в InMemoryTaskManagerTest", epic.getId());
         manager.create(sameSubtask);
@@ -167,7 +151,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldEvaluatedEpicStatus() {
+    void shouldEvaluatedEpicStatus() {
         subtask.setStatus(Status.IN_PROGRESS);
         manager.updateSubtask(subtask);
 
@@ -177,7 +161,7 @@ class InMemoryTaskManagerTest extends BaseTest {
     }
 
     @Test
-    public void shouldReturnHistory() {
+    void shouldReturnHistory() {
         manager.getTask(task.getId());
         manager.getEpic(epic.getId());
         manager.getSubtask(subtask.getId());
@@ -188,13 +172,24 @@ class InMemoryTaskManagerTest extends BaseTest {
         manager.updateEpic(epic);
 
         List<Task> history = manager.getHistory();
-        assertEquals(3, history.size());
+        assertEquals(2, history.size());
     }
 
     @Test
-    public void shouldReturnHistoryOnlyLast10Tasks() {
-        for (int i = 0; i < 11; i++) {
+    void shouldReturnOneTasksHistory() {
+        for (int i = 0; i < 10; i++) {
             manager.getTask(task.getId());
+        }
+
+        assertEquals(1, manager.getHistory().size());
+    }
+
+    @Test
+    void shouldReturnTenTasksHistory() {
+        for (int i = 0; i < 10; i++) {
+            Task oneMoreTask = new Task(task);
+            manager.create(oneMoreTask);
+            manager.getTask(oneMoreTask.getId());
         }
 
         assertEquals(10, manager.getHistory().size());
