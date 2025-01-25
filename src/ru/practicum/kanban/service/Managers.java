@@ -4,7 +4,9 @@ public class Managers {
     /**
      * Don't let anyone instantiate this class.
      */
-    private Managers() {}
+    private Managers() {
+
+    }
 
 
     public static TaskManager getDefault() {
