@@ -20,12 +20,12 @@ public class Main {
         // добавить эпик и 2 подзадачи
         Epic goShop = new Epic("Сходить в магазин", "Сходить в \"Пятёрочку\" на углу");
         manager.create(goShop);
-        Subtask byBread = new Subtask(
+        Subtask buyBread = new Subtask(
                 "Купить хлеба", "Купить буханку чёрного хлеба и половинку батона", goShop.getId());
-        manager.create(byBread);
-        Subtask byButter = new Subtask(
+        manager.create(buyBread);
+        Subtask buyButter = new Subtask(
                 "Купить масло", "Купить пачку сливочного масла 82,5%", goShop.getId());
-        manager.create(byButter);
+        manager.create(buyButter);
 
         // добавить эпик и 1 подзадачу
         Epic washPlates = new Epic("Помыть посуду", "Помыть посуду в раковинне и на столе");
@@ -42,8 +42,8 @@ public class Main {
         manager.updateTask(eatCat);
         drinkCat.setStatus(Status.DONE);
         manager.updateTask(drinkCat);
-        byBread.setStatus(Status.IN_PROGRESS);
-        manager.updateSubtask(byBread);
+        buyBread.setStatus(Status.IN_PROGRESS);
+        manager.updateSubtask(buyBread);
         wash.setStatus(Status.DONE);
         manager.updateSubtask(wash);
 
@@ -57,8 +57,8 @@ public class Main {
         manager.getTask(eatCat.getId());
         manager.getTask(drinkCat.getId());
         manager.getEpic(goShop.getId());
-        manager.getSubtask(byBread.getId());
-        manager.getSubtask(byButter.getId());
+        manager.getSubtask(buyBread.getId());
+        manager.getSubtask(buyButter.getId());
         manager.getEpic(washPlates.getId());
         manager.getEpic(washPlates.getId());
         manager.getEpic(washPlates.getId());
@@ -74,10 +74,35 @@ public class Main {
         manager.deleteTask(drinkCat.getId());
         manager.deleteEpic(washPlates.getId());
 
-        manager.deleteSubtask(byBread.getId());
+        manager.deleteSubtask(buyBread.getId());
 
         // распечатать Эпики, Задачи, Подзадачи
         print("Состояние задач после удаления:", manager);
+
+        // дополнительное задание 6 спринта (покрыто unit-тестами ¯\_(ツ)_/¯ )
+        Task makeProject = new Task("Сделать проект", "Выполнить проект 6 спринта");
+        manager.create(makeProject);
+
+        Epic cookDinner = new Epic("Приготовить ужин", "Приготовить жареный картофель");
+        manager.create(cookDinner);
+
+        Subtask buySweets = new Subtask("Купить конфет", "Купить килограмм конфет", goShop.getId());
+        manager.create(buySweets);
+        Subtask buyMilk = new Subtask("Купить молока", "Купить молоко 1,5%", goShop.getId());
+        manager.create(buyMilk);
+
+        manager.getTask(eatCat.getId());
+        manager.getTask(makeProject.getId());
+        manager.getEpic(cookDinner.getId());
+        manager.getTask(eatCat.getId());
+        manager.getSubtask(buySweets.getId());
+        manager.getSubtask(buyMilk.getId());
+        manager.deleteTask(eatCat.getId());
+        manager.deleteTask(makeProject.getId());
+        printHistory("История просмотров задач без дубликатов:", manager);
+
+        manager.deleteEpic(goShop.getId());
+        printHistory("История просмотров задач без эпика goShop и его подзадач:", manager);
     }
 
     private static void print(String title, TaskManager manager) {
