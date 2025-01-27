@@ -2,10 +2,7 @@ package ru.practicum.kanban.service;
 
 import ru.practicum.kanban.model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Класс {@code InMemoryTaskManager} реализует интерфейс {@code TaskManager} и
@@ -42,17 +39,21 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Удаление всех задач ------------------------------------------------------------------------------------------
     @Override
     public void clearTasks() {
+        removeAllTasksFromHistory(tasks.keySet());
         tasks.clear();
     }
 
     @Override
     public void clearEpics() {
+        removeAllTasksFromHistory(epics.keySet());
+        removeAllTasksFromHistory(subtasks.keySet());
         epics.clear();
         subtasks.clear();
     }
 
     @Override
     public void clearSubtasks() {
+        removeAllTasksFromHistory(subtasks.keySet());
         subtasks.clear();
 
         for (Epic epic : epics.values()) {
@@ -157,15 +158,18 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Удаление по идентификатору -----------------------------------------------------------------------------------
     @Override
     public Task deleteTask(int id) {
+        removeTaskFromHistory(id);
         return tasks.remove(id);
     }
 
     @Override
     public Epic deleteEpic(int id) {
         for (Integer subtaskId : epics.get(id).getSubtasksIds()) {
+            removeTaskFromHistory(subtaskId);
             subtasks.remove(subtaskId);
         }
 
+        removeTaskFromHistory(id);
         return epics.remove(id);
     }
 
@@ -174,7 +178,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.getSubtasksIds().remove(subtasks.get(id).getId());
         evaluateEpicStatus(epic);
-
+        removeTaskFromHistory(id);
         return subtasks.remove(id);
     }
 
@@ -229,6 +233,14 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
     private static Integer generateId() {
         return idCounter++;
+    }
+
+    private void removeTaskFromHistory(int id) {
+        historyManager.remove(id);
+    }
+
+    private void removeAllTasksFromHistory(Set<Integer> ids) {
+        ids.forEach(this::removeTaskFromHistory);
     }
 
     @Override
