@@ -195,4 +195,23 @@ class InMemoryTaskManagerTest extends BaseTest {
         assertEquals(10, manager.getHistory().size());
     }
 
+    @Test
+    void historyShouldBeCleanedUpAfterAllTasksDeletion() {
+        for (int i = 0; i < 10; i++) {
+            Task oneMoreTask = new Task(task);
+            manager.create(oneMoreTask);
+            manager.getTask(oneMoreTask.getId());
+        }
+
+        for (int i = 0; i < 10; i++) {
+            Epic oneMoreEpic = new Epic(epic);
+            manager.create(epic);
+            manager.getEpic(epic.getId());
+        }
+
+        manager.clearTasks();
+
+        assertEquals(10, manager.getHistory().size());
+    }
+
 }
