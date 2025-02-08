@@ -20,7 +20,7 @@ import java.util.List;
  * @author Smirnov Sergey
  */
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    Path backup;
+    private Path backup;
 
 
     public FileBackedTaskManager(HistoryManager historyManager, Path backup) {
@@ -28,6 +28,33 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.backup = backup;
     }
 
+
+    //--- Чтение файла бэкапа ------------------------------------------------------------------------------------------
+    /**
+     * Читает состояние менеджера задач из файла бэкапа.
+     *
+     * <p>Метод создает новый экземпляр {@code FileBackedTaskManager}, читает содержимое файла {@code backup},
+     * и восстанавливает состояние менеджера задач на основе данных из файла. Первая строка (заголовок) пропускается.
+     * Также устанавливает счетчик ID на основании максимального значения ID, найденного в файле.</p>
+     *
+     * @param backup путь до файла бэкапа
+     * @return экземпляр {@code FileBackedTaskManager}, восстановленный из файла
+     * @throws ManagerLoadException ошибка при чтении файла или его парсинге
+     */
+    public static FileBackedTaskManager loadFromFile(Path backup) {
+        try {
+            FileBackedTaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), backup);
+            List<String> lines = Files.readAllLines(backup, StandardCharsets.UTF_8);
+            if (lines.size() > 1) {
+                lines.removeFirst(); // удалить заголовок
+                lines.forEach(line -> load(line, taskManager));
+                setIdCounter(getMaxId(lines) + 1);
+            }
+            return taskManager;
+        } catch (IOException e) {
+            throw new ManagerLoadException("Ошибка при чтении файла бэкапа: " + e.getMessage());
+        }
+    }
 
     //--- Создание задачи в менеджере ----------------------------------------------------------------------------------
     @Override
@@ -98,33 +125,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void clearSubtasks() {
         super.clearSubtasks();
         save();
-    }
-
-    //--- Чтение файла бэкапа ------------------------------------------------------------------------------------------
-    /**
-     * Читает состояние менеджера задач из файла бэкапа.
-     *
-     * <p>Метод создает новый экземпляр {@code FileBackedTaskManager}, читает содержимое файла {@code backup},
-     * и восстанавливает состояние менеджера задач на основе данных из файла. Первая строка (заголовок) пропускается.
-     * Также устанавливает счетчик ID на основании максимального значения ID, найденного в файле.</p>
-     *
-     * @param backup путь до файла бэкапа
-     * @return экземпляр {@code FileBackedTaskManager}, восстановленный из файла
-     * @throws ManagerLoadException ошибка при чтении файла или его парсинге
-     */
-    public static FileBackedTaskManager loadFromFile(Path backup) {
-        try {
-            FileBackedTaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), backup);
-            List<String> lines = Files.readAllLines(backup, StandardCharsets.UTF_8);
-            if (lines.size() > 1) {
-                lines.removeFirst(); // удалить заголовок
-                lines.forEach(line -> load(line, taskManager));
-                setIdCounter(getMaxId(lines) + 1);
-            }
-            return taskManager;
-        } catch (IOException e) {
-            throw new ManagerLoadException("Ошибка при чтении файла бэкапа: " + e.getMessage());
-        }
     }
 
     //--- Восстанавливает задачу в менеджере ---------------------------------------------------------------------------
