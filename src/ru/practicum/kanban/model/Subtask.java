@@ -9,6 +9,11 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
+    public Subtask(int id, String title, Status status, String description, int epicId) {
+        super(id, title, status, description);
+        this.epicId = epicId;
+    }
+
     public Subtask(Subtask subtask) {
         super(subtask);
         this.epicId = subtask.getEpicId();
@@ -17,6 +22,11 @@ public class Subtask extends Task {
 
     public int getEpicId() {
         return epicId;
+    }
+
+    @Override
+    public String toCsvString() {
+        return super.toCsvString() + epicId;
     }
 
     @Override

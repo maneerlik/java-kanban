@@ -4,8 +4,11 @@ import ru.practicum.kanban.model.Epic;
 import ru.practicum.kanban.model.Status;
 import ru.practicum.kanban.model.Subtask;
 import ru.practicum.kanban.model.Task;
+import ru.practicum.kanban.service.FileBackedTaskManager;
 import ru.practicum.kanban.service.Managers;
 import ru.practicum.kanban.service.TaskManager;
+
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
@@ -103,6 +106,15 @@ public class Main {
 
         manager.deleteEpic(goShop.getId());
         printHistory("История просмотров задач без эпика goShop и его подзадач:", manager);
+
+        // проверка задания 7 спринта (покрыто unit-тестами ¯\_(ツ)_/¯ )
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(Paths.get(".\\resources\\backup.csv"));
+        print("Состояние менеджера восстановленного из пустого файла:", fbtm);
+
+        Task testTask = new Task("Тестовая задача", "Тестовая задача 7 спринта");
+        fbtm.create(testTask);
+        fbtm.deleteTask(testTask.getId());
+
     }
 
     private static void print(String title, TaskManager manager) {

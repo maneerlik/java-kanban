@@ -15,6 +15,13 @@ public class Task {
         this.description = description;
     }
 
+    public Task(int id, String title, Status status, String description) {
+        this.id = id;
+        this.title = title;
+        this.status = status;
+        this.description = description;
+    }
+
     public Task(Task task) {
         this.title = task.title;
         this.description = task.description;
@@ -49,6 +56,10 @@ public class Task {
 
     public Type getType() {
         return Type.TASK;
+    }
+
+    public String toCsvString() {
+        return String.format("%d,%s,%s,%s,%s,", id, getType(), title, status, description);
     }
 
     @Override
