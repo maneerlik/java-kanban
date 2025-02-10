@@ -63,22 +63,23 @@ public class FileBackedTaskManagerTest extends BaseTest {
 
     @Test
     void testIdCounterCorrectnessAfterFileLoad() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(backup.toFile(), StandardCharsets.UTF_8))) {
-            writer.write("""
-                    id,type,name,status,description,epic
-                    17,TASK,Тестовая задача,NEW,Задача в InMemoryTaskManagerTest,
-                    3,EPIC,Тестовый эпик,NEW,Эпик в InMemoryTaskManagerTest,
-                    11,SUBTASK,Тестовая подзадача,NEW,Подзадача в InMemoryTaskManagerTest,3
-                    """);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        writeBackup();
         FileBackedTaskManager sameFBManager = FileBackedTaskManager.loadFromFile(backup);
         Task sameTask = new Task(task);
         sameFBManager.create(sameTask);
 
         assertEquals(18, sameTask.getId(), "Генератор id инициализирован неверно");
+    }
+
+    @Test
+    void testEpicSubtasksIdsAreRestoredCorrectly() {
+        writeBackup();
+        FileBackedTaskManager sameFBManager = FileBackedTaskManager.loadFromFile(backup);
+
+        int expectedSubtaskId = sameFBManager.getAllSubtasks().getFirst().getId();
+        int actualSubtaskId = sameFBManager.getAllEpics().getFirst().getSubtasksIds().getFirst();
+
+        assertEquals(expectedSubtaskId, actualSubtaskId, "Список subtasksIds восстановлен некорректно");
     }
 
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
@@ -95,6 +96,19 @@ public class FileBackedTaskManagerTest extends BaseTest {
             return taskString + ((Subtask) task).getEpicId();
 
         return taskString;
+    }
+
+    private void writeBackup() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(backup.toFile(), StandardCharsets.UTF_8))) {
+            writer.write("""
+                    id,type,name,status,description,epic
+                    17,TASK,Тестовая задача,NEW,Задача в InMemoryTaskManagerTest,
+                    3,EPIC,Тестовый эпик,NEW,Эпик в InMemoryTaskManagerTest,
+                    11,SUBTASK,Тестовая подзадача,NEW,Подзадача в InMemoryTaskManagerTest,3
+                    """);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

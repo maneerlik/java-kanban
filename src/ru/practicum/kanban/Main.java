@@ -114,7 +114,6 @@ public class Main {
         Task testTask = new Task("Тестовая задача", "Тестовая задача 7 спринта");
         fbtm.create(testTask);
         fbtm.deleteTask(testTask.getId());
-
     }
 
     private static void print(String title, TaskManager manager) {
