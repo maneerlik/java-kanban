@@ -17,7 +17,12 @@ public class InMemoryTaskManager implements TaskManager {
     private Map<Integer, Epic> epics = new HashMap<>();
     private Map<Integer, Subtask> subtasks = new HashMap<>();
 
-    private HistoryManager historyManager = Managers.getDefaultHistory();
+    private HistoryManager historyManager;
+
+
+    public InMemoryTaskManager(HistoryManager historyManager) {
+        this.historyManager = historyManager;
+    }
 
 
     //--- Получение всех задач -----------------------------------------------------------------------------------------
@@ -233,6 +238,20 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
     private static Integer generateId() {
         return idCounter++;
+    }
+
+    protected static void setIdCounter(int id) {
+        idCounter = id;
+    }
+
+    protected void addTask(Task task) {
+        Type type = task.getType();
+
+        switch (type) {
+            case TASK -> tasks.put(task.getId(), task);
+            case EPIC -> epics.put(task.getId(), (Epic) task);
+            case SUBTASK -> subtasks.put(task.getId(), (Subtask) task);
+        }
     }
 
     private void removeTaskFromHistory(int id) {
