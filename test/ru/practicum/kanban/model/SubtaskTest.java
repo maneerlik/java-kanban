@@ -16,9 +16,9 @@ class SubtaskTest extends BaseTest {
     @Test
     void subtasksAreEqualIfIdsAreEqual() {
         manager.create(subtask);
-        Subtask sameSubtask = new Subtask(subtask);
+        Subtask anotherSubtask = new Subtask(subtask);
 
-        assertEquals(subtask, sameSubtask, "объекты не равны");
+        assertEquals(subtask, anotherSubtask, "объекты не равны");
     }
 
 }

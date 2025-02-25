@@ -15,9 +15,9 @@ class EpicTest extends BaseTest {
     @Test
     void epicsAreEqualIfIdsAreEqual() {
         manager.create(epic);
-        Epic sameEpic = new Epic(epic);
+        Epic anotherEpic = new Epic(epic);
 
-        assertEquals(epic, sameEpic, "объекты не равны");
+        assertEquals(epic, anotherEpic, "объекты не равны");
     }
 
 }
