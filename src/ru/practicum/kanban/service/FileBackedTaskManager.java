@@ -217,15 +217,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Записывает данные бэкапа в файл.
      *
      * <p>Метод принимает список строк, представляющих задачи в формате CSV, и записывает их в файл бэкапа. Добавляет
-     * заголовок, содержащий названия полей: "id,type,name,status,description,epic". Каждая строка из списка
-     * записывается в файл с новой строки.</p>
+     * заголовок, содержащий названия полей: "id,type,name,status,description,startTime,duration,epic". Каждая строка
+     * из списка записывается в файл с новой строки.</p>
      *
      * @param lines список строк, представляющий задачи в формате CSV
      * @throws ManagerSaveException ошибка при записи данных в файл
      */
     private void writeBackup(List<String> lines) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(backup.toFile(), StandardCharsets.UTF_8))) {
-            bw.append("id,type,name,status,description,epic\n");
+            bw.append("id,type,name,status,description,startTime,duration,epic\n");
             for (String s : lines) {
                 bw.append(s).append("\n");
             }

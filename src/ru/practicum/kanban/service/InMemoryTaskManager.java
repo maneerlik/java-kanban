@@ -224,11 +224,30 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //--- Вернуть отсортированный по приоритету список задач и подзадач ------------------------------------------------
+    @Override
     public List<Task> getPrioritizedTasks() {
         return prioritizedTasks.stream().toList();
     }
 
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
+    protected void addTask(Task task) {
+        Type type = task.getType();
+
+        switch (type) {
+            case TASK -> tasks.put(task.getId(), task);
+            case EPIC -> epics.put(task.getId(), (Epic) task);
+            case SUBTASK -> {
+                Subtask subtask = (Subtask) task;
+                epics.get(subtask.getEpicId()).getSubtasksIds().add(subtask.getId());
+                subtasks.put(subtask.getId(), subtask);
+            }
+        }
+    }
+
+    protected static void setIdCounter(int id) {
+        idCounter = id;
+    }
+
     /**
      *  Возвращает список подзадач на основе переданного списка идентификаторов.
      */
@@ -251,9 +270,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void addTaskToPrioritizedList(Task task) {
-        if (!task.isPrioritizedTask() || isOverlapping(task)) {
+        if (!task.isPrioritizedTask()) return;
+        if (prioritizedTasks.contains(task)) return;
+        if (isOverlapping(task))
             throw new ManagerCreateTaskException("Ошибка при добавлении задачи в список приоритетных");
-        }
+
         prioritizedTasks.add(task);
     }
 
@@ -261,29 +282,11 @@ public class InMemoryTaskManager implements TaskManager {
         return idCounter++;
     }
 
-    protected static void setIdCounter(int id) {
-        idCounter = id;
-    }
-
-    public void evaluateEpicPriority(Epic epic) {
+    private void evaluateEpicPriority(Epic epic) {
         List<Subtask> epicSubtasks = getSubtasksByIds(epic.getSubtasksIds());
         epic.calculateStartTime(epicSubtasks);
         epic.calculateStartTime(epicSubtasks);
         epic.calculateDuration();
-    }
-
-    protected void addTask(Task task) {
-        Type type = task.getType();
-
-        switch (type) {
-            case TASK -> tasks.put(task.getId(), task);
-            case EPIC -> epics.put(task.getId(), (Epic) task);
-            case SUBTASK -> {
-                Subtask subtask = (Subtask) task;
-                epics.get(subtask.getEpicId()).getSubtasksIds().add(subtask.getId());
-                subtasks.put(subtask.getId(), subtask);
-            }
-        }
     }
 
     private void removeTaskFromHistory(int id) {

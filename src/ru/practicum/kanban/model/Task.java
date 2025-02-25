@@ -69,7 +69,7 @@ public class Task implements Comparable<Task> {
         return null;
     }
 
-    protected Duration getDuration() {
+    public Duration getDuration() {
         return duration;
     }
 
@@ -77,7 +77,7 @@ public class Task implements Comparable<Task> {
         this.duration = duration;
     }
 
-    protected Instant getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 

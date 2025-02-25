@@ -118,7 +118,6 @@ public class Main {
         Subtask testSubtask = new Subtask("Тестовая подзадача", "Простая тестовая подзадача", testEpic.getId());
         fbtm.create(testSubtask);
         fbtm.deleteTask(testTask.getId());
-
     }
 
     private static void print(String title, TaskManager manager) {
