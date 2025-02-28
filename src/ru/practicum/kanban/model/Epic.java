@@ -61,7 +61,10 @@ public class Epic extends Task {
     }
 
     public void calculateStartTime(List<Subtask> subtasks) {
-        if (subtasksIds.isEmpty()) return;
+        if (subtasksIds.isEmpty()) {
+            setStartTime(null);
+            return;
+        }
 
         Instant startTime = subtasks.stream()
                 .map(Subtask::getStartTime)
@@ -76,13 +79,19 @@ public class Epic extends Task {
         Instant startTime = getStartTime();
         Instant endTime = getEndTime();
 
-        if (startTime == null || endTime == null) return;
+        if (startTime == null || endTime == null) {
+            setDuration(null);
+            return;
+        }
 
         setDuration(Duration.between(startTime, endTime));
     }
 
     public void calculateEndTime(List<Subtask> subtasks) {
-        if (subtasksIds.isEmpty()) return;
+        if (subtasksIds.isEmpty()) {
+            endTime = null;
+            return;
+        }
 
         endTime = subtasks.stream()
                 .map(Subtask::getEndTime)

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -108,8 +109,8 @@ public class FileBackedTaskManagerTest extends BaseTest {
                 task.getTitle(),
                 task.getStatus(),
                 task.getDescription(),
-                task.getStartTime(),
-                task.getDuration()
+                Objects.isNull(task.getStartTime()) ? "" : task.getStartTime(),
+                Objects.isNull(task.getDuration()) ? "" : task.getDuration()
         );
 
         if (task instanceof Subtask)
