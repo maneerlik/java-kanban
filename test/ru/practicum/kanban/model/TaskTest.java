@@ -22,9 +22,9 @@ class TaskTest extends BaseTest {
     @Test
     void tasksAreEqualIfIdsAreEqual() {
         manager.create(task);
-        Task sameTask = new Task(task);
+        Task anotherTask = new Task(task);
 
-        assertEquals(task, sameTask, "объекты не равны");
+        assertEquals(task, anotherTask, "объекты не равны");
     }
 
 }

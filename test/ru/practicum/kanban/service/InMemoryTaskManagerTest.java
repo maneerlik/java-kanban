@@ -2,23 +2,25 @@ package ru.practicum.kanban.service;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.kanban.BaseTest;
+import ru.practicum.kanban.exception.ManagerCreateTaskException;
 import ru.practicum.kanban.model.Epic;
 import ru.practicum.kanban.model.Status;
 import ru.practicum.kanban.model.Subtask;
 import ru.practicum.kanban.model.Task;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest extends BaseTest {
 
     @Test
     void shouldCreatedTask() {
         assertNotNull(task);
-        assertEquals("Тестовая задача", task.getTitle());
-        assertEquals("Задача в InMemoryTaskManagerTest", task.getDescription());
+        assertEquals("Задача", task.getTitle());
+        assertEquals("Тестовая задача", task.getDescription());
         assertEquals(Status.NEW, task.getStatus());
         assertNotNull(task.getId());
     }
@@ -26,8 +28,8 @@ class InMemoryTaskManagerTest extends BaseTest {
     @Test
     void shouldCreatedEpic() {
         assertNotNull(epic);
-        assertEquals("Тестовый эпик", epic.getTitle());
-        assertEquals("Эпик в InMemoryTaskManagerTest", epic.getDescription());
+        assertEquals("Эпик", epic.getTitle());
+        assertEquals("Тестовый эпик", epic.getDescription());
         assertEquals(Status.NEW, epic.getStatus());
         assertNotNull(epic.getId());
     }
@@ -35,16 +37,16 @@ class InMemoryTaskManagerTest extends BaseTest {
     @Test
     void shouldCreatedSubtask() {
         assertNotNull(subtask);
-        assertEquals("Тестовая подзадача", subtask.getTitle());
-        assertEquals("Подзадача в InMemoryTaskManagerTest", subtask.getDescription());
+        assertEquals("Подзадача", subtask.getTitle());
+        assertEquals("Тестовая подзадача", subtask.getDescription());
         assertEquals(Status.NEW, subtask.getStatus());
         assertNotNull(subtask.getId());
     }
 
     @Test
     void shouldReturnAllTasks() {
-        Task sameTask = new Task(task);
-        manager.create(sameTask);
+        Task anotherTask = new Task(task);
+        manager.create(anotherTask);
 
         List<Task> tasks = manager.getAllTasks();
         assertEquals(2, tasks.size());
@@ -52,8 +54,8 @@ class InMemoryTaskManagerTest extends BaseTest {
 
     @Test
     void shouldReturnAllEpics() {
-        Epic sameEpic = new Epic(epic);
-        manager.create(sameEpic);
+        Epic anotherEpic = new Epic(epic);
+        manager.create(anotherEpic);
 
         List<Epic> epics = manager.getAllEpics();
         assertEquals(2, epics.size());
@@ -61,8 +63,8 @@ class InMemoryTaskManagerTest extends BaseTest {
 
     @Test
     void shouldReturnAllSubtasks() {
-        Subtask sameSubtask = new Subtask(subtask);
-        manager.create(sameSubtask);
+        Subtask anotherSubtask = new Subtask(subtask);
+        manager.create(anotherSubtask);
 
         List<Subtask> subtasks = manager.getAllSubtasks();
         assertEquals(2, subtasks.size());
@@ -142,9 +144,9 @@ class InMemoryTaskManagerTest extends BaseTest {
 
     @Test
     void shouldReturnSubtasksByEpic() {
-        Subtask sameSubtask = new Subtask(
+        Subtask anotherSubtask = new Subtask(
                 "Еще тестовая подзадача", "Еще подзадача в InMemoryTaskManagerTest", epic.getId());
-        manager.create(sameSubtask);
+        manager.create(anotherSubtask);
 
         List<Subtask> subtasks = manager.getSubtasksByEpic(epic.getId());
         assertEquals(2, subtasks.size());
@@ -212,6 +214,30 @@ class InMemoryTaskManagerTest extends BaseTest {
         manager.clearTasks();
 
         assertEquals(10, manager.getHistory().size());
+    }
+
+    @Test
+    void shouldReturnSortedPriorityTasks () {
+        Task betweenTask = new Task(
+                0, "Промежуточная задача", Status.NEW,
+                "Задача между двумя существующими в списке приоритетов",
+                task.getEndTime().plus(1, ChronoUnit.MINUTES), Duration.ofMinutes(1));
+
+        manager.create(betweenTask);
+        List<Task> prioritizedTasks = manager.getPrioritizedTasks();
+
+        assertEquals("Задача", prioritizedTasks.getFirst().getTitle());
+        assertEquals("Промежуточная задача", prioritizedTasks.get(1).getTitle());
+        assertEquals("Подзадача", prioritizedTasks.get(2).getTitle());
+    }
+
+    @Test
+    void shouldThrowExceptionForOverlappingTaskTimes() {
+        Task overlappingTask = new Task(0, "Пересекающаяся задача", Status.NEW,
+                "Задача которая пересекается с существующей в списке приоритетов",
+                task.getStartTime().plus(1, ChronoUnit.MINUTES), Duration.ofMinutes(1));
+
+        assertThrows(ManagerCreateTaskException.class, () -> manager.create(overlappingTask));
     }
 
 }

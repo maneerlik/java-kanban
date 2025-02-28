@@ -11,7 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,18 +37,28 @@ public class FileBackedTaskManagerTest extends BaseTest {
             throw new RuntimeException(e);
         }
 
-        assertEquals("id,type,name,status,description,epic", lines.getFirst(), "Неверный заголовок файла");
+        assertEquals("id,type,name,status,description,startTime,duration,epic",
+                lines.getFirst(), "Неверный заголовок файла");
         assertEquals(1, lines.size(), "Файл бэкапа не пуст");
     }
 
     @Test
     void testFileBackedTaskManagerSavesCorrectState() {
-        Task sameTask = new Task(task);
-        fbManager.create(sameTask);
-        Epic sameEpic = new Epic(epic);
-        fbManager.create(sameEpic);
-        Subtask sameSubtask = new Subtask(subtask.getTitle(), subtask.getDescription(), sameEpic.getId());
-        fbManager.create(sameSubtask);
+        Task anotherTask = new Task(task);
+        fbManager.create(anotherTask);
+        Epic anotherEpic = new Epic(epic);
+        fbManager.create(anotherEpic);
+        Subtask anotherSubtask = new Subtask(
+                subtask.getId(),
+                subtask.getTitle(),
+                subtask.getStatus(),
+                subtask.getDescription(),
+                subtask.getStartTime(),
+                subtask.getDuration(),
+                anotherEpic.getId()
+        );
+        fbManager.create(anotherSubtask);
+        fbManager.updateEpic(anotherEpic); // т.к. после создания связанной subtask время эпика изменилось
         List<String> lines;
 
         try {
@@ -55,41 +67,50 @@ public class FileBackedTaskManagerTest extends BaseTest {
             throw new RuntimeException(e);
         }
 
-        assertEquals("id,type,name,status,description,epic", lines.getFirst(), "Неверный заголовок файла");
-        assertEquals(getExpectedResult(sameTask), lines.get(1), "Неверное сохранение Task");
-        assertEquals(getExpectedResult(sameEpic), lines.get(2), "Неверное сохранение Epic");
-        assertEquals(getExpectedResult(sameSubtask), lines.get(3), "Неверное сохранение Subtask");
+        assertEquals("id,type,name,status,description,startTime,duration,epic",
+                lines.getFirst(), "Неверный заголовок файла");
+        assertEquals(getExpectedResult(anotherTask), lines.get(1), "Неверное сохранение Task");
+        assertEquals(getExpectedResult(anotherEpic), lines.get(2), "Неверное сохранение Epic");
+        assertEquals(getExpectedResult(anotherSubtask), lines.get(3), "Неверное сохранение Subtask");
     }
 
     @Test
     void testIdCounterCorrectnessAfterFileLoad() {
         writeBackup();
-        FileBackedTaskManager sameFBManager = FileBackedTaskManager.loadFromFile(backup);
-        Task sameTask = new Task(task);
-        sameFBManager.create(sameTask);
+        FileBackedTaskManager anotherFBManager = FileBackedTaskManager.loadFromFile(backup);
+        List<Task> allTasks = new ArrayList<>();
+        allTasks.addAll(anotherFBManager.getAllTasks());
+        allTasks.addAll(anotherFBManager.getAllEpics());
+        allTasks.addAll(anotherFBManager.getAllSubtasks());
+        int expectedIdCounterValue = allTasks.stream().mapToInt(Task::getId).max().orElse(0) + 1;
 
-        assertEquals(18, sameTask.getId(), "Генератор id инициализирован неверно");
+        Task anotherTask = new Task(task);
+        anotherFBManager.create(anotherTask);
+
+        assertEquals(expectedIdCounterValue, anotherTask.getId(), "Генератор id инициализирован неверно");
     }
 
     @Test
     void testEpicSubtasksIdsAreRestoredCorrectly() {
         writeBackup();
-        FileBackedTaskManager sameFBManager = FileBackedTaskManager.loadFromFile(backup);
+        FileBackedTaskManager anotherFBManager = FileBackedTaskManager.loadFromFile(backup);
 
-        int expectedSubtaskId = sameFBManager.getAllSubtasks().getFirst().getId();
-        int actualSubtaskId = sameFBManager.getAllEpics().getFirst().getSubtasksIds().getFirst();
+        int expectedSubtaskId = anotherFBManager.getAllSubtasks().getFirst().getId();
+        int actualSubtaskId = anotherFBManager.getAllEpics().getFirst().getSubtasksIds().getFirst();
 
         assertEquals(expectedSubtaskId, actualSubtaskId, "Список subtasksIds восстановлен некорректно");
     }
 
     //--- Вспомогательные методы ---------------------------------------------------------------------------------------
     private String getExpectedResult(Task task) {
-        String taskString = String.format("%d,%s,%s,%s,%s,",
+        String taskString = String.format("%d,%s,%s,%s,%s,%s,%s,",
                 task.getId(),
                 task.getType(),
                 task.getTitle(),
                 task.getStatus(),
-                task.getDescription()
+                task.getDescription(),
+                Objects.isNull(task.getStartTime()) ? "" : task.getStartTime(),
+                Objects.isNull(task.getDuration()) ? "" : task.getDuration()
         );
 
         if (task instanceof Subtask)
@@ -101,10 +122,10 @@ public class FileBackedTaskManagerTest extends BaseTest {
     private void writeBackup() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(backup.toFile(), StandardCharsets.UTF_8))) {
             writer.write("""
-                    id,type,name,status,description,epic
-                    17,TASK,Тестовая задача,NEW,Задача в InMemoryTaskManagerTest,
-                    3,EPIC,Тестовый эпик,NEW,Эпик в InMemoryTaskManagerTest,
-                    11,SUBTASK,Тестовая подзадача,NEW,Подзадача в InMemoryTaskManagerTest,3
+                    id,type,name,status,description,startTime,duration,epic
+                    6,TASK,Задача,NEW,Тестовая задача,2025-02-25T05:17:53.291356200Z,PT1H30M,
+                    12,EPIC,Эпик,DONE,Тестовый эпик,2025-02-25T05:17:53.293355100Z,PT30M,
+                    17,SUBTASK,Подзадача,NEW,Тестовая подзадача,2025-02-25T06:47:53.293355100Z,PT30M,12
                     """);
         } catch (IOException e) {
             throw new RuntimeException(e);

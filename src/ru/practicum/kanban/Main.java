@@ -111,8 +111,12 @@ public class Main {
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(Paths.get(".\\resources\\backup.csv"));
         print("Состояние менеджера восстановленного из пустого файла:", fbtm);
 
-        Task testTask = new Task("Тестовая задача", "Тестовая задача 7 спринта");
+        Task testTask = new Task("Тестовая задача", "Простая тестовая задача");
         fbtm.create(testTask);
+        Epic testEpic = new Epic("Тестовый эпик", "Простой тестовый эпик");
+        fbtm.create(testEpic);
+        Subtask testSubtask = new Subtask("Тестовая подзадача", "Простая тестовая подзадача", testEpic.getId());
+        fbtm.create(testSubtask);
         fbtm.deleteTask(testTask.getId());
     }
 

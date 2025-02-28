@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,7 @@ import java.util.List;
  * @author Smirnov Sergey
  */
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    private Path backup;
+    private final Path backup;
 
 
     public FileBackedTaskManager(HistoryManager historyManager, Path backup) {
@@ -172,7 +174,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * @return экземпляр задачи ({@code Task}, {@code Epic} или {@code Subtask}) в зависимости от типа
      */
     private static Task getTask(String line) {
-        String[] items = line.split(",");
+        String[] items = line.split(",", -1);
 
         int id = Integer.parseInt(items[0]);
         Type type = Type.valueOf(items[1]);
@@ -180,10 +182,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Status status = Status.valueOf(items[3]);
         String description = items[4];
 
+        Instant startTime = items[5].isBlank() ? null : Instant.parse(items[5]);
+        Duration duration = items[6].isBlank() ? null : Duration.parse(items[6]);
+        int epicId = items[7].isBlank() ? 0 : Integer.parseInt(items[7]);
+
         return switch (type) {
-            case TASK -> new Task(id, title, status, description);
-            case EPIC -> new Epic(id, title, status, description);
-            case SUBTASK -> new Subtask(id, title, status, description, Integer.parseInt(items[5]));
+            case TASK -> new Task(id, title, status, description, startTime, duration);
+            case EPIC -> new Epic(id, title, status, description, startTime, duration);
+            case SUBTASK -> new Subtask(id, title, status, description, startTime, duration, epicId);
         };
     }
 
@@ -211,15 +217,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Записывает данные бэкапа в файл.
      *
      * <p>Метод принимает список строк, представляющих задачи в формате CSV, и записывает их в файл бэкапа. Добавляет
-     * заголовок, содержащий названия полей: "id,type,name,status,description,epic". Каждая строка из списка
-     * записывается в файл с новой строки.</p>
+     * заголовок, содержащий названия полей: "id,type,name,status,description,startTime,duration,epic". Каждая строка
+     * из списка записывается в файл с новой строки.</p>
      *
      * @param lines список строк, представляющий задачи в формате CSV
      * @throws ManagerSaveException ошибка при записи данных в файл
      */
     private void writeBackup(List<String> lines) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(backup.toFile(), StandardCharsets.UTF_8))) {
-            bw.append("id,type,name,status,description,epic\n");
+            bw.append("id,type,name,status,description,startTime,duration,epic\n");
             for (String s : lines) {
                 bw.append(s).append("\n");
             }
