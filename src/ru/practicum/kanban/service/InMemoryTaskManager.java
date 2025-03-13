@@ -1,6 +1,9 @@
 package ru.practicum.kanban.service;
 
 import ru.practicum.kanban.exception.ManagerCreateTaskException;
+import ru.practicum.kanban.exception.ManagerPrioritizedException;
+import ru.practicum.kanban.exception.ManagerUpdateTaskException;
+import ru.practicum.kanban.exception.NotFoundException;
 import ru.practicum.kanban.model.*;
 
 import java.util.*;
@@ -77,6 +80,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
+        if (task == null) throw new NotFoundException(getErrorMessage(Action.GET, id));
         historyManager.add(new Task(task));
         return task;
     }
@@ -84,6 +88,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
+        if (epic == null) throw new NotFoundException(getErrorMessage(Action.GET, id));
         historyManager.add(new Epic(epic));
         return epic;
     }
@@ -91,6 +96,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
+        if (subtask == null) throw new NotFoundException(getErrorMessage(Action.GET, id));
         historyManager.add(new Subtask(subtask));
         return subtask;
     }
@@ -101,6 +107,9 @@ public class InMemoryTaskManager implements TaskManager {
      * */
     @Override
     public <T extends Task> T create(T task) {
+        if (task == null)
+            throw new ManagerCreateTaskException(getErrorMessage(Action.CREATE));
+
         task.setId(generateId());
 
         Type type = task.getType();
@@ -134,9 +143,11 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Обновление задачи в менеджере --------------------------------------------------------------------------------
     @Override
     public Task updateTask(Task task) {
-        if (!tasks.containsKey(task.getId())) {
-            return null;
-        }
+        if (task == null)
+            throw new ManagerUpdateTaskException(getErrorMessage(Action.UPDATE));
+
+        if (!tasks.containsKey(task.getId()))
+            throw new ManagerUpdateTaskException(getErrorMessage(Action.UPDATE, task.getId()));
 
         Task updatedTask = new Task(task);
         addTaskToPrioritizedList(updatedTask);
@@ -161,9 +172,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask updateSubtask(Subtask subtask) {
-        if (!subtasks.containsKey(subtask.getId())) {
-            return null;
-        }
+        if (subtask == null)
+            throw new ManagerUpdateTaskException(getErrorMessage(Action.UPDATE));
+
+        if (!subtasks.containsKey(subtask.getId()))
+            throw new ManagerUpdateTaskException(getErrorMessage(Action.UPDATE, subtask.getId()));
 
         Subtask updatedSubtask = new Subtask(subtask);
         addTaskToPrioritizedList(updatedSubtask);
@@ -177,6 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
     //--- Удаление по идентификатору -----------------------------------------------------------------------------------
     @Override
     public Task deleteTask(int id) {
+        if (!tasks.containsKey(id)) throw new NotFoundException(getErrorMessage(Action.DELETE, id));
         removeTaskFromHistory(id);
         prioritizedTasks.remove(tasks.get(id));
         return tasks.remove(id);
@@ -196,6 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask deleteSubtask(int id) {
+        if (!subtasks.containsKey(id)) throw new NotFoundException(getErrorMessage(Action.DELETE, id));
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.getSubtasksIds().remove(subtasks.get(id).getId());
         evaluateEpicStatus(epic);
@@ -252,7 +267,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    protected static void setIdCounter(int id) {
+    public static void setIdCounter(int id) {
         idCounter = id;
     }
 
@@ -280,8 +295,7 @@ public class InMemoryTaskManager implements TaskManager {
     private void addTaskToPrioritizedList(Task task) {
         if (!task.isPrioritizedTask()) return;
         if (prioritizedTasks.contains(task)) return;
-        if (isOverlapping(task))
-            throw new ManagerCreateTaskException("Ошибка при добавлении задачи в список приоритетных");
+        if (isOverlapping(task)) throw new ManagerPrioritizedException("Error. Tasks Intersection");
 
         prioritizedTasks.add(task);
     }
@@ -308,6 +322,26 @@ public class InMemoryTaskManager implements TaskManager {
     private void removeAllTasksFromHistory(Set<Integer> ids) {
         ids.forEach(this::removeTaskFromHistory);
     }
+
+    private String getErrorMessage(Action action) {
+        return switch (action) {
+            case CREATE -> "Create error. Null value not allowed";
+            case GET -> null;
+            case UPDATE -> "Update error. Null value not allowed";
+            case DELETE -> null;
+        };
+    }
+
+    private String getErrorMessage(Action action, int id) {
+        return switch (action) {
+            case CREATE -> null;
+            case GET -> String.format("Record %s missing", id);
+            case UPDATE -> String.format("Update error. Record %s missing", id);
+            case DELETE -> String.format("Delete error. Record %s missing", id);
+        };
+    }
+
+    private enum Action { CREATE, GET, UPDATE, DELETE }
 
     @Override
     public String toString() {

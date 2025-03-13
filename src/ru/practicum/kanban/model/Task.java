@@ -4,9 +4,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
-public class Task implements Comparable<Task> {
-    private final String title;
-    private final String description;
+public class  Task implements Comparable<Task> {
+    private String title;
+    private String description;
     private Integer id;
     private Instant startTime;
     private Duration duration;

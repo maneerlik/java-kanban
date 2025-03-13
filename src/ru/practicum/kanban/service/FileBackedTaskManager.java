@@ -54,7 +54,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
             return taskManager;
         } catch (IOException e) {
-            throw new ManagerLoadException("Ошибка при чтении файла бэкапа: " + e.getMessage());
+            throw new ManagerLoadException("Error reading backup file: " + e.getMessage());
         }
     }
 
@@ -230,7 +230,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 bw.append(s).append("\n");
             }
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка при записи файла бэкапа: " + e.getMessage());
+            throw new ManagerSaveException("Error writing backup file: " + e.getMessage());
         }
     }
 }
