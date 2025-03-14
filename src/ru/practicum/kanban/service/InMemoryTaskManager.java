@@ -341,8 +341,6 @@ public class InMemoryTaskManager implements TaskManager {
         };
     }
 
-    private enum Action { CREATE, GET, UPDATE, DELETE }
-
     @Override
     public String toString() {
         return String.format("InMemoryTaskManager{\n\ttasks=%s,\n\tepics=%s,\n\tsubtasks=%s\n}", tasks, epics, subtasks);

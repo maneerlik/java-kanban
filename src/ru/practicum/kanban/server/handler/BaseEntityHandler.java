@@ -1,5 +1,7 @@
 package ru.practicum.kanban.server.handler;
 
+import static java.net.HttpURLConnection.*;
+
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import ru.practicum.kanban.exception.ManagerCreateTaskException;
@@ -14,8 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static ru.practicum.kanban.server.Constants.*;
-
+/**
+ * Абстрактный базовый класс для обработки HTTP-запросов, связанных с сущностями (Task, Epic, Subtask) в системе
+ * управления задачами. Предоставляет обобщенную структуру для выполнения операций CRUD (Create, Read, Update, Delete)
+ * путем реализации обработчиков для HTTP-методов GET, POST и DELETE
+ *
+ * <p>Для сериализации и десериализации JSON используется библиотека {@link com.google.gson.Gson}
+ *
+ * <p>Подклассы должны реализовать абстрактные методы, чтобы предоставить специфическую для сущности логику: получения,
+ * создания, обновления и удаления
+ *
+ * @param <T> тип сущности, обрабатываемой классом (Task, Epic, Subtask)
+ *
+ * @author  Smirnov Sergey
+ */
 public abstract class BaseEntityHandler<T> extends BaseHttpHandler {
     protected final Map<String, Consumer<HttpExchange>> handlers;
 
@@ -130,7 +144,7 @@ public abstract class BaseEntityHandler<T> extends BaseHttpHandler {
 
     private void getEntitySubtasks(HttpExchange exchange) {
         int id = extractId(exchange);
-        List<Subtask> subtasks = getEntitySubtasks(id);
+        List<Subtask> subtasks = taskManager.getSubtasksByEpic(id);
         sendText(exchange, gson.toJson(subtasks), HTTP_OK);
     }
 
@@ -148,8 +162,6 @@ public abstract class BaseEntityHandler<T> extends BaseHttpHandler {
     protected abstract T updateEntity(T entity) throws ManagerUpdateTaskException;
 
     protected abstract T deleteEntity(int id) throws NotFoundException;
-
-    protected abstract List<Subtask> getEntitySubtasks(int id);
 
     protected abstract Class<T> getEntityClass();
 

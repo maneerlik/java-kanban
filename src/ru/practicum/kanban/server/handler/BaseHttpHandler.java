@@ -1,5 +1,8 @@
 package ru.practicum.kanban.server.handler;
 
+import static java.net.HttpURLConnection.*;
+import static ru.practicum.kanban.server.Constants.*;
+
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,9 +16,21 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static ru.practicum.kanban.server.Constants.*;
-
-
+/**
+ * Абстрактный базовый класс для обработки HTTP-запросов в системе управления задачами. Реализует интерфейс
+ * {@link HttpHandler} и предоставляет общие методы для обработки запросов (отправка ответов, чтение тела запроса,
+ * обработка исключений и валидация URI)
+ *
+ * <p>Использует {@link TaskManager} для управления задачами и {@link Gson} для работы с JSON. Также предоставляет
+ * вспомогательные методы для отправки стандартных HTTP-ответов
+ *
+ * <p>Содержит абстрактный метод {@link #handle(HttpExchange)}, который должен быть реализован в подклассах
+ * для обработки конкретных HTTP-запросов
+ *
+ * <p>Логирование {@link Logger}
+ *
+ * @author  Smirnov Sergey
+ */
 public abstract class BaseHttpHandler implements HttpHandler {
     private static final Logger logger = Logger.getLogger(BaseHttpHandler.class.getName());
 

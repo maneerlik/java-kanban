@@ -5,7 +5,6 @@ import ru.practicum.kanban.exception.ManagerCreateTaskException;
 import ru.practicum.kanban.exception.ManagerPrioritizedException;
 import ru.practicum.kanban.exception.ManagerUpdateTaskException;
 import ru.practicum.kanban.exception.NotFoundException;
-import ru.practicum.kanban.model.Subtask;
 import ru.practicum.kanban.model.Task;
 import ru.practicum.kanban.service.TaskManager;
 
@@ -42,11 +41,6 @@ public class TaskHandler extends BaseEntityHandler<Task> {
     @Override
     protected Task deleteEntity(int id) throws NotFoundException {
         return taskManager.deleteTask(id);
-    }
-
-    @Override
-    protected List<Subtask> getEntitySubtasks(int id) {
-        return List.of(); // Заглушка
     }
 
     @Override

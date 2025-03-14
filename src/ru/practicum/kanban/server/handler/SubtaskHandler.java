@@ -44,11 +44,6 @@ public class SubtaskHandler extends BaseEntityHandler<Subtask> {
     }
 
     @Override
-    protected List<Subtask> getEntitySubtasks(int id) {
-        return List.of(); // Заглушка
-    }
-
-    @Override
     protected Class<Subtask> getEntityClass() {
         return Subtask.class;
     }
