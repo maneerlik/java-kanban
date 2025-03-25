@@ -3,6 +3,7 @@ package ru.practicum.kanban.service;
 import org.junit.jupiter.api.Test;
 import ru.practicum.kanban.BaseTest;
 import ru.practicum.kanban.exception.ManagerCreateTaskException;
+import ru.practicum.kanban.exception.ManagerPrioritizedException;
 import ru.practicum.kanban.model.Epic;
 import ru.practicum.kanban.model.Status;
 import ru.practicum.kanban.model.Subtask;
@@ -237,7 +238,7 @@ class InMemoryTaskManagerTest extends BaseTest {
                 "Задача которая пересекается с существующей в списке приоритетов",
                 task.getStartTime().plus(1, ChronoUnit.MINUTES), Duration.ofMinutes(1));
 
-        assertThrows(ManagerCreateTaskException.class, () -> manager.create(overlappingTask));
+        assertThrows(ManagerPrioritizedException.class, () -> manager.create(overlappingTask));
     }
 
 }
